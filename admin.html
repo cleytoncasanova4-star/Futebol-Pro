@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Painel Administrativo - FutebolPro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f0f2f5;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #1a1a2e;
+        }
+        .btn {
+            background: #e63946;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #c62828;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #bb2d3b;
+        }
+        .btn-success {
+            background: #198754;
+        }
+        .btn-success:hover {
+            background: #157347;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+        .btn-warning:hover {
+            background: #ffca2c;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #e63946;
+        }
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filters input, .filters select {
+            padding: 0.6rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+        .filters input {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .table-container {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+        }
+        td {
+            padding: 1rem;
+            border-top: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-published {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-scheduled {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .actions .btn {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .modal h2 {
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
+            table { font-size: 0.85rem; }
+            .actions .btn { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ Painel Administrativo - FutebolPro</h1>
+            <div>
+                <a href="index.html" class="btn" target="_blank">👁️ Ver Site</a>
+                <button class="btn" onclick="openModal()">+ Novo Artigo</button>
+            </div>
+        </header>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3>Total de Artigos</h3>
+                <div class="number" id="totalArticles">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Publicados</h3>
+                <div class="number" id="publishedArticles">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Rascunhos</h3>
+                <div class="number" id="draftArticles">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Agendados</h3>
+                <div class="number" id="scheduledArticles">0</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 Buscar artigos..." oninput="filterArticles()">
+            <select id="statusFilter" onchange="filterArticles()">
+                <option value="all">Todos os status</option>
+                <option value="publicado">Publicados</option>
+                <option value="rascunho">Rascunhos</option>
+                <option value="agendado">Agendados</option>
+            </select>
+            <select id="categoryFilter" onchange="filterArticles()">
+                <option value="all">Todas as categorias</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Categoria</th>
+                        <th>Autor</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="articlesTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal" id="articleModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 id="modalTitle">Novo Artigo</h2>
+            <form id="articleForm" onsubmit="saveArticle(event)">
+                <input type="hidden" id="articleId" value="">
+                
+                <div class="form-group">
+                    <label>Título *</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Resumo (excerpt) *</label>
+                    <input type="text" id="editExcerpt" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Conteúdo (HTML) *</label>
+                    <textarea id="editContent" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL da Imagem</label>
+                        <input type="url" id="editImage" placeholder="https://exemplo.com/imagem.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria *</label>
+                        <input type="text" id="editCategory" required placeholder="Ex: Táticas, História, Transferências">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Autor *</label>
+                        <input type="text" id="editAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo de Leitura</label>
+                        <input type="text" id="editReadTime" placeholder="Ex: 10 min">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tags (separadas por vírgula)</label>
+                        <input type="text" id="editTags" placeholder="Táticas, Futebol, Brasileirão">
+                    </div>
+                    <div class="form-group">
+                        <label>Bio do Autor</label>
+                        <input type="text" id="editBio" placeholder="Especialista em futebol e análises táticas.">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="editStatus">
+                            <option value="publicado">Publicado</option>
+                            <option value="rascunho">Rascunho</option>
+                            <option value="agendado">Agendado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let articles = [];
+        let currentFilter = 'all';
+        let currentCategory = 'all';
+        let searchTerm = '';
+
+        async function loadArticles() {
+            try {
+                const response = await fetch('articles.json');
+                const data = await response.json();
+                articles = data.articles || [];
+                renderTable();
+                updateStats();
+                populateCategories();
+            } catch (error) {
+                console.error('Erro ao carregar artigos:', error);
+                articles = getMockArticles();
+                renderTable();
+                updateStats();
+                populateCategories();
+            }
+        }
+
+        function getMockArticles() {
+            return [{
+                id: 1,
+                title: "Táticas Modernas no Futebol",
+                excerpt: "Descubra as táticas mais inovadoras...",
+                content: "<h2>Introdução</h2><p>Conteúdo completo...</p>",
+                image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop",
+                category: "Táticas",
+                author: "Carlos Alberto",
+                date: "17/07/2026",
+                readTime: "10 min",
+                tags: ["Táticas", "Futebol"],
+                status: "publicado",
+                bio: "Analista tático com 15 anos de experiência."
+            }];
+        }
+
+        function downloadJSON(data) {
+            const blob = new Blob([JSON.stringify({ articles: data }, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'articles.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('📥 Baixe o arquivo articles.json e substitua no servidor!');
+        }
+
+        function saveArticles() {
+            try {
+                fetch('articles.json', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articles })
+                }).then(response => {
+                    if (response.ok) alert('✅ Artigos salvos com sucesso!');
+                }).catch(() => downloadJSON(articles));
+            } catch {
+                downloadJSON(articles);
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('articlesTable');
+            const filtered = getFilteredArticles();
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#6c757d;">Nenhum artigo encontrado</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(art => `
+                <tr>
+                    <td>#${art.id}</td>
+                    <td><strong>${art.title}</strong></td>
+                    <td><span class="tag" style="background:#e63946;color:#fff;padding:0.2rem 0.8rem;border-radius:30px;font-size:0.7rem;">${art.category}</span></td>
+                    <td>${art.author}</td>
+                    <td>${art.date}</td>
+                    <td><span class="status-badge status-${art.status || 'publicado'}">${art.status || 'Publicado'}</span></td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-warning" onclick="editArticle(${art.id})">✏️</button>
+                            <button class="btn btn-danger" onclick="deleteArticle(${art.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getFilteredArticles() {
+            return articles.filter(art => {
+                const matchSearch = art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  art.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  art.author.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchStatus = currentFilter === 'all' || art.status === currentFilter;
+                const matchCategory = currentCategory === 'all' || art.category === currentCategory;
+                return matchSearch && matchStatus && matchCategory;
+            });
+        }
+
+        function updateStats() {
+            const total = articles.length;
+            const published = articles.filter(a => a.status === 'publicado').length;
+            const drafts = articles.filter(a => a.status === 'rascunho').length;
+            const scheduled = articles.filter(a => a.status === 'agendado').length;
+            
+            document.getElementById('totalArticles').textContent = total;
+            document.getElementById('publishedArticles').textContent = published;
+            document.getElementById('draftArticles').textContent = drafts;
+            document.getElementById('scheduledArticles').textContent = scheduled;
+        }
+
+        function populateCategories() {
+            const categories = [...new Set(articles.map(a => a.category))];
+            const select = document.getElementById('categoryFilter');
+            const currentValue = select.value;
+            select.innerHTML = `<option value="all">Todas as categorias</option>` +
+                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            select.value = currentValue;
+        }
+
+        function filterArticles() {
+            searchTerm = document.getElementById('searchInput').value;
+            currentFilter = document.getElementById('statusFilter').value;
+            currentCategory = document.getElementById('categoryFilter').value;
+            renderTable();
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').textContent = '✏️ Novo Artigo';
+            document.getElementById('articleId').value = '';
+            document.getElementById('editTitle').value = '';
+            document.getElementById('editExcerpt').value = '';
+            document.getElementById('editContent').value = '';
+            document.getElementById('editImage').value = '';
+            document.getElementById('editCategory').value = '';
+            document.getElementById('editAuthor').value = '';
+            document.getElementById('editReadTime').value = '10 min';
+            document.getElementById('editTags').value = '';
+            document.getElementById('editBio').value = '';
+            document.getElementById('editStatus').value = 'publicado';
+            document.getElementById('articleModal').classList.add('active');
+        }
+
+        function editArticle(id) {
+            const art = articles.find(a => a.id === id);
+            if (!art) return;
+            
+            document.getElementById('modalTitle').textContent = '✏️ Editar Artigo #' + id;
+            document.getElementById('articleId').value = id;
+            document.getElementById('editTitle').value = art.title;
+            document.getElementById('editExcerpt').value = art.excerpt;
+            document.getElementById('editContent').value = art.content;
+            document.getElementById('editImage').value = art.image || '';
+            document.getElementById('editCategory').value = art.category;
+            document.getElementById('editAuthor').value = art.author;
+            document.getElementById('editReadTime').value = art.readTime || '10 min';
+            document.getElementById('editTags').value = (art.tags || []).join(', ');
+            document.getElementById('editBio').value = art.bio || '';
+            document.getElementById('editStatus').value = art.status || 'publicado';
+            document.getElementById('articleModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('articleModal').classList.remove('active');
+        }
+
+        function saveArticle(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('articleId').value;
+            const title = document.getElementById('editTitle').value;
+            const excerpt = document.getElementById('editExcerpt').value;
+            const content = document.getElementById('editContent').value;
+            const image = document.getElementById('editImage').value;
+            const category = document.getElementById('editCategory').value;
+            const author = document.getElementById('editAuthor').value;
+            const readTime = document.getElementById('editReadTime').value;
+            const tags = document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const bio = document.getElementById('editBio').value;
+            const status = document.getElementById('editStatus').value;
+            
+            const today = new Date().toLocaleDateString('pt-BR');
+            
+            if (id) {
+                const index = articles.findIndex(a => a.id === parseInt(id));
+                if (index !== -1) {
+                    articles[index] = {
+                        ...articles[index],
+                        title, excerpt, content,
+                        image: image || articles[index].image,
+                        category, author,
+                        readTime: readTime || articles[index].readTime,
+                        tags, bio, status
+                    };
+                }
+            } else {
+                const newId = articles.length > 0 ? Math.max(...articles.map(a => a.id)) + 1 : 1;
+                articles.push({
+                    id: newId,
+                    title, excerpt, content,
+                    image: image || 'https://picsum.photos/seed/football' + newId + '/600/400',
+                    category, author,
+                    date: today,
+                    readTime: readTime || '10 min',
+                    tags, bio, status
+                });
+            }
+            
+            closeModal();
+            renderTable();
+            updateStats();
+            populateCategories();
+            saveArticles();
+        }
+
+        function deleteArticle(id) {
+            if (!confirm('Tem certeza que deseja excluir este artigo?')) return;
+            articles = articles.filter(a => a.id !== id);
+            renderTable();
+            updateStats();
+            populateCategories();
+            saveArticles();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        loadArticles();
+    </script>
+</body>
+</html>
